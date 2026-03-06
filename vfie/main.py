@@ -4,6 +4,7 @@ import shutil
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from models.company import CompanyContext
@@ -128,3 +129,6 @@ async def get_last_report():
 @app.get("/health")
 async def health():
     return {"status": "ok", "version": "1.0.0"}
+
+os.makedirs("static", exist_ok=True)
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
