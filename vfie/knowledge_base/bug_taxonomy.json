@@ -1,0 +1,152 @@
+{
+    "SQL_INJECTION": {
+        "category": "injection",
+        "confidentiality_impact": "high",
+        "integrity_impact": "high",
+        "availability_impact": "medium",
+        "data_exfiltration": true,
+        "lateral_movement_possible": true,
+        "typical_fix_hours": 6,
+        "severity_default": "critical"
+    },
+    "XSS": {
+        "category": "injection",
+        "confidentiality_impact": "medium",
+        "integrity_impact": "medium",
+        "availability_impact": "low",
+        "data_exfiltration": false,
+        "lateral_movement_possible": false,
+        "typical_fix_hours": 3,
+        "severity_default": "high"
+    },
+    "AUTH_BYPASS": {
+        "category": "authentication",
+        "confidentiality_impact": "high",
+        "integrity_impact": "high",
+        "availability_impact": "low",
+        "data_exfiltration": true,
+        "lateral_movement_possible": true,
+        "typical_fix_hours": 12,
+        "severity_default": "critical"
+    },
+    "INSECURE_DESERIALIZATION": {
+        "category": "injection",
+        "confidentiality_impact": "high",
+        "integrity_impact": "high",
+        "availability_impact": "high",
+        "data_exfiltration": true,
+        "lateral_movement_possible": true,
+        "typical_fix_hours": 16,
+        "severity_default": "critical"
+    },
+    "SSRF": {
+        "category": "server_side",
+        "confidentiality_impact": "high",
+        "integrity_impact": "medium",
+        "availability_impact": "low",
+        "data_exfiltration": true,
+        "lateral_movement_possible": true,
+        "typical_fix_hours": 8,
+        "severity_default": "high"
+    },
+    "IDOR": {
+        "category": "access_control",
+        "confidentiality_impact": "high",
+        "integrity_impact": "medium",
+        "availability_impact": "low",
+        "data_exfiltration": true,
+        "lateral_movement_possible": false,
+        "typical_fix_hours": 5,
+        "severity_default": "high"
+    },
+    "RCE": {
+        "category": "injection",
+        "confidentiality_impact": "high",
+        "integrity_impact": "high",
+        "availability_impact": "high",
+        "data_exfiltration": true,
+        "lateral_movement_possible": true,
+        "typical_fix_hours": 20,
+        "severity_default": "critical"
+    },
+    "PATH_TRAVERSAL": {
+        "category": "file_access",
+        "confidentiality_impact": "high",
+        "integrity_impact": "medium",
+        "availability_impact": "low",
+        "data_exfiltration": true,
+        "lateral_movement_possible": false,
+        "typical_fix_hours": 4,
+        "severity_default": "high"
+    },
+    "HARDCODED_CREDENTIALS": {
+        "category": "secrets",
+        "confidentiality_impact": "high",
+        "integrity_impact": "high",
+        "availability_impact": "medium",
+        "data_exfiltration": true,
+        "lateral_movement_possible": true,
+        "typical_fix_hours": 2,
+        "severity_default": "critical"
+    },
+    "CSRF": {
+        "category": "session",
+        "confidentiality_impact": "low",
+        "integrity_impact": "high",
+        "availability_impact": "low",
+        "data_exfiltration": false,
+        "lateral_movement_possible": false,
+        "typical_fix_hours": 4,
+        "severity_default": "medium"
+    },
+    "OPEN_REDIRECT": {
+        "category": "url",
+        "confidentiality_impact": "medium",
+        "integrity_impact": "low",
+        "availability_impact": "low",
+        "data_exfiltration": false,
+        "lateral_movement_possible": false,
+        "typical_fix_hours": 2,
+        "severity_default": "medium"
+    },
+    "XXE": {
+        "category": "injection",
+        "confidentiality_impact": "high",
+        "integrity_impact": "medium",
+        "availability_impact": "medium",
+        "data_exfiltration": true,
+        "lateral_movement_possible": false,
+        "typical_fix_hours": 6,
+        "severity_default": "high"
+    },
+    "COMMAND_INJECTION": {
+        "category": "injection",
+        "confidentiality_impact": "high",
+        "integrity_impact": "high",
+        "availability_impact": "high",
+        "data_exfiltration": true,
+        "lateral_movement_possible": true,
+        "typical_fix_hours": 8,
+        "severity_default": "critical"
+    },
+    "WEAK_CRYPTO": {
+        "category": "cryptography",
+        "confidentiality_impact": "high",
+        "integrity_impact": "medium",
+        "availability_impact": "low",
+        "data_exfiltration": true,
+        "lateral_movement_possible": false,
+        "typical_fix_hours": 6,
+        "severity_default": "high"
+    },
+    "INSECURE_RANDOM": {
+        "category": "cryptography",
+        "confidentiality_impact": "medium",
+        "integrity_impact": "high",
+        "availability_impact": "low",
+        "data_exfiltration": false,
+        "lateral_movement_possible": false,
+        "typical_fix_hours": 2,
+        "severity_default": "medium"
+    }
+}
