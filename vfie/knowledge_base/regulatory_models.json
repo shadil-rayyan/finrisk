@@ -1,36 +1,16 @@
 {
     "GDPR": {
         "fine_percentage_of_arr": 0.04,
-        "max_fine_usd": 20000000,
-        "applies_if": [
-            "EU_users",
-            "PII"
-        ]
+        "max_fine_usd": 20000000
     },
     "PCI_DSS": {
-        "min_fine": 50000,
-        "max_fine": 500000,
-        "avg_fine": 250000,
-        "applies_if": [
-            "financial",
-            "payment_cards"
-        ]
+        "avg_fine": 250000
     },
     "HIPAA": {
-        "min_fine": 100,
-        "max_fine": 50000,
-        "max_annual": 1900000,
-        "applies_if": [
-            "health"
-        ]
+        "max_annual": 1900000
     },
     "CCPA": {
         "per_record_intentional": 750,
-        "per_record_unintentional": 100,
-        "max_fine": 7500,
-        "applies_if": [
-            "PII",
-            "California_users"
-        ]
+        "max_fine": 7500
     }
 }

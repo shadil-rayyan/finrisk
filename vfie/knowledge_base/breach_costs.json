@@ -21,6 +21,5 @@
         "low_sensitivity": 0.02,
         "medium_sensitivity": 0.05,
         "high_sensitivity": 0.10
-    },
-    "reputation_damage_multiplier": 1.15
+    }
 }

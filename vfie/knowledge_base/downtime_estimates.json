@@ -10,7 +10,6 @@
         "XSS": 1,
         "IDOR": 2,
         "PATH_TRAVERSAL": 2,
-        "XXE": 2,
         "CSRF": 1,
         "WEAK_CRYPTO": 2,
         "INSECURE_RANDOM": 1,
