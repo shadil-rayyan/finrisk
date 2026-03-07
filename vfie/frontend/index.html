@@ -719,12 +719,18 @@
 
                         <div class="grid-2">
                             <div>
-                                <label>Active Users</label>
-                                <input type="number" id="active_users" placeholder="20000" />
+                                <label>System Role (Fixes infra assumption)</label>
+                                <select id="system_role">
+                                    <option value="saas_product" selected>SaaS Product</option>
+                                    <option value="infrastructure">Infrastructure Component</option>
+                                    <option value="framework">Framework / Library</option>
+                                    <option value="internal_tool">Internal Tool</option>
+                                    <option value="microservice">Microservice</option>
+                                </select>
                             </div>
                             <div>
-                                <label>Avg Revenue per User / Month</label>
-                                <input type="number" id="arpu" placeholder="50" />
+                                <label>Active Users</label>
+                                <input type="number" id="active_users" placeholder="20000" />
                             </div>
                         </div>
 
@@ -734,8 +740,8 @@
                                 <input type="number" id="engineer_cost" placeholder="80" />
                             </div>
                             <div>
-                                <label>Records Stored</label>
-                                <input type="number" id="records" placeholder="200000" />
+                                <label>Avg Revenue per User / Month</label>
+                                <input type="number" id="arpu" placeholder="50" />
                             </div>
                         </div>
 
@@ -749,124 +755,128 @@
                                 </select>
                             </div>
                             <div>
-                                <label>Downtime Cost / Hour (USD)</label>
-                                <input type="number" id="downtime_cost" placeholder="12000" />
+                                <label>Records Stored</label>
+                                <input type="number" id="records" placeholder="200000" />
                             </div>
                         </div>
-
-                        <label>Sensitive Data Types</label>
-                        <div class="checkbox-group" id="data_types">
-                            <label class="checkbox-item checked"><input type="checkbox" value="PII" checked> PII</label>
-                            <label class="checkbox-item checked"><input type="checkbox" value="financial" checked>
-                                Financial</label>
-                            <label class="checkbox-item"><input type="checkbox" value="health"> Health</label>
-                            <label class="checkbox-item"><input type="checkbox" value="credentials"> Credentials</label>
-                        </div>
-
-                        <label>Regulatory Frameworks</label>
-                        <div class="checkbox-group" id="regulations">
-                            <label class="checkbox-item checked"><input type="checkbox" value="GDPR" checked>
-                                GDPR</label>
-                            <label class="checkbox-item checked"><input type="checkbox" value="PCI_DSS" checked> PCI
-                                DSS</label>
-                            <label class="checkbox-item"><input type="checkbox" value="HIPAA"> HIPAA</label>
-                            <label class="checkbox-item"><input type="checkbox" value="CCPA"> CCPA</label>
-                        </div>
-
-                        <label>Product Description (helps AI understand business context)</label>
-                        <textarea id="product_desc"
-                            placeholder="e.g. B2B SaaS payments platform serving SMBs. Handles invoicing, payouts, and financial reporting."></textarea>
-
-                        <label>Tech Stack (helps AI assess real exploitability)</label>
-                        <textarea id="stack_desc"
-                            placeholder="e.g. Django REST API, PostgreSQL, Redis, hosted on AWS ECS. Public API behind Cloudflare WAF."></textarea>
-                    </div>
-                </div>
-
-                <!-- Right: Scan Config + Gemini -->
-                <div>
-                    <div class="card">
-                        <div class="card-title">Repository Scan</div>
-
-                        <label>GitHub Repository URL</label>
-                        <input type="text" id="repo_url" placeholder="https://github.com/company/payment-api" />
-
-                        <label>Branch</label>
-                        <input type="text" id="branch" placeholder="main" value="main" />
-                    </div>
-
-                    <div class="card">
-                        <div class="card-title">AI Analysis (Gemini)</div>
-
-                        <div class="toggle-row">
-                            <label class="toggle">
-                                <input type="checkbox" id="gemini_toggle" onchange="toggleGemini(this)">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div class="toggle-label">Enable Gemini AI Analysis</div>
-                                <div class="toggle-desc">Assesses real exploitability + finds attack chains</div>
-                            </div>
-                        </div>
-
-                        <div id="gemini_fields" class="hidden">
-                            <label>Gemini API Key (free at aistudio.google.com)</label>
-                            <input type="password" id="gemini_key" placeholder="AIza..." />
-
-                            <div
-                                style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--muted);">
-                                <strong style="color:var(--text);">With AI enabled, the engine will:</strong><br>
-                                • Read actual code context to filter false positives<br>
-                                • Adjust exploit probability based on real code patterns<br>
-                                • Understand what each endpoint actually does<br>
-                                • Find attack chains across multiple vulnerabilities<br>
-                                • Generate specific fix code for each vulnerability
-                            </div>
+                        <div>
+                            <label>Downtime Cost / Hour (USD)</label>
+                            <input type="number" id="downtime_cost" placeholder="12000" />
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-title">What Happens Next</div>
-                        <div style="font-size:13px;color:var(--muted);line-height:1.8;">
-                            1. Repository is cloned and scanned with Semgrep<br>
-                            2. Each finding is classified and financially modeled<br>
-                            3. <span id="ai_step_desc">Financial impact calculated from company context</span><br>
-                            4. Results ranked by expected dollar loss<br>
-                            5. Executive brief generated per vulnerability<br>
-                            6. Board-level summary produced
-                        </div>
+                    <label>Sensitive Data Types</label>
+                    <div class="checkbox-group" id="data_types">
+                        <label class="checkbox-item checked"><input type="checkbox" value="PII" checked> PII</label>
+                        <label class="checkbox-item checked"><input type="checkbox" value="financial" checked>
+                            Financial</label>
+                        <label class="checkbox-item"><input type="checkbox" value="health"> Health</label>
+                        <label class="checkbox-item"><input type="checkbox" value="credentials"> Credentials</label>
                     </div>
 
-                    <button class="btn btn-primary btn-lg" onclick="runScan()" id="scan_btn">
-                        🔍 Run Security Scan
-                    </button>
-                    <div class="error-box" id="scan_error"></div>
+                    <label>Regulatory Frameworks</label>
+                    <div class="checkbox-group" id="regulations">
+                        <label class="checkbox-item checked"><input type="checkbox" value="GDPR" checked>
+                            GDPR</label>
+                        <label class="checkbox-item checked"><input type="checkbox" value="PCI_DSS" checked> PCI
+                            DSS</label>
+                        <label class="checkbox-item"><input type="checkbox" value="HIPAA"> HIPAA</label>
+                        <label class="checkbox-item"><input type="checkbox" value="CCPA"> CCPA</label>
+                    </div>
+
+                    <label>Product Description (helps AI understand business context)</label>
+                    <textarea id="product_desc"
+                        placeholder="e.g. B2B SaaS payments platform serving SMBs. Handles invoicing, payouts, and financial reporting."></textarea>
+
+                    <label>Tech Stack (helps AI assess real exploitability)</label>
+                    <textarea id="stack_desc"
+                        placeholder="e.g. Django REST API, PostgreSQL, Redis, hosted on AWS ECS. Public API behind Cloudflare WAF."></textarea>
                 </div>
             </div>
-        </div>
 
-        <!-- MANUAL TAB -->
-        <div id="tab-manual" class="hidden">
-            <div class="grid-2">
-                <div>
-                    <div class="card">
-                        <div class="card-title">Company Context</div>
-                        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
-                            Same as the Scan tab. Fill in the fields there — they are shared.
-                        </p>
-                        <a href="#" onclick="switchTab('scan');return false;"
-                            style="color:var(--accent);font-size:13px;">
-                            ← Fill in company context in the Scan tab
-                        </a>
+            <!-- Right: Scan Config + Gemini -->
+            <div>
+                <div class="card">
+                    <div class="card-title">Repository Scan</div>
+
+                    <label>GitHub Repository URL</label>
+                    <input type="text" id="repo_url" placeholder="https://github.com/company/payment-api" />
+
+                    <label>Branch</label>
+                    <input type="text" id="branch" placeholder="main" value="main" />
+                </div>
+
+                <div class="card">
+                    <div class="card-title">AI Analysis (Gemini)</div>
+
+                    <div class="toggle-row">
+                        <label class="toggle">
+                            <input type="checkbox" id="gemini_toggle" onchange="toggleGemini(this)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div>
+                            <div class="toggle-label">Enable Gemini AI Analysis</div>
+                            <div class="toggle-desc">Assesses real exploitability + finds attack chains</div>
+                        </div>
+                    </div>
+
+                    <div id="gemini_fields" class="hidden">
+                        <label>Gemini API Key (free at aistudio.google.com)</label>
+                        <input type="password" id="gemini_key" placeholder="AIza..." />
+
+                        <div
+                            style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--muted);">
+                            <strong style="color:var(--text);">With AI enabled, the engine will:</strong><br>
+                            • Read actual code context to filter false positives<br>
+                            • Adjust exploit probability based on real code patterns<br>
+                            • Understand what each endpoint actually does<br>
+                            • Find attack chains across multiple vulnerabilities<br>
+                            • Generate specific fix code for each vulnerability
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <div class="card">
-                        <div class="card-title">Vulnerabilities (JSON)</div>
-                        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
-                            Paste vulnerability data directly. Useful for testing without a repo.
-                        </p>
-                        <textarea id="manual_vulns" style="min-height:300px;" placeholder='[
+
+                <div class="card">
+                    <div class="card-title">What Happens Next</div>
+                    <div style="font-size:13px;color:var(--muted);line-height:1.8;">
+                        1. Repository is cloned and scanned with Semgrep<br>
+                        2. Each finding is classified and financially modeled<br>
+                        3. <span id="ai_step_desc">Financial impact calculated from company context</span><br>
+                        4. Results ranked by expected dollar loss<br>
+                        5. Executive brief generated per vulnerability<br>
+                        6. Board-level summary produced
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-lg" onclick="runScan()" id="scan_btn">
+                    🔍 Run Security Scan
+                </button>
+                <div class="error-box" id="scan_error"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MANUAL TAB -->
+    <div id="tab-manual" class="hidden">
+        <div class="grid-2">
+            <div>
+                <div class="card">
+                    <div class="card-title">Company Context</div>
+                    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+                        Same as the Scan tab. Fill in the fields there — they are shared.
+                    </p>
+                    <a href="#" onclick="switchTab('scan');return false;" style="color:var(--accent);font-size:13px;">
+                        ← Fill in company context in the Scan tab
+                    </a>
+                </div>
+            </div>
+            <div>
+                <div class="card">
+                    <div class="card-title">Vulnerabilities (JSON)</div>
+                    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+                        Paste vulnerability data directly. Useful for testing without a repo.
+                    </p>
+                    <textarea id="manual_vulns" style="min-height:300px;" placeholder='[
   {
     "id": "VULN_001",
     "raw_rule_id": "sql-injection",
@@ -886,63 +896,63 @@
     "exposure": "PUBLIC"
   }
 ]'></textarea>
-                        <button class="btn btn-primary btn-lg" onclick="runManual()" id="manual_btn">
-                            📊 Analyze Vulnerabilities
-                        </button>
-                        <div class="error-box" id="manual_error"></div>
-                    </div>
+                    <button class="btn btn-primary btn-lg" onclick="runManual()" id="manual_btn">
+                        📊 Analyze Vulnerabilities
+                    </button>
+                    <div class="error-box" id="manual_error"></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- LOADING -->
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <div style="font-size:16px;font-weight:600;margin-bottom:16px;">Analyzing your codebase...</div>
-            <div class="loading-steps" id="loading_steps">
-                <div class="loading-step" id="step1">⏳ Scanning repository for vulnerabilities</div>
-                <div class="loading-step" id="step2">⏳ Classifying and modeling financial impact</div>
-                <div class="loading-step" id="step3">⏳ Running AI analysis on code context</div>
-                <div class="loading-step" id="step4">⏳ Detecting attack chains</div>
-                <div class="loading-step" id="step5">⏳ Generating executive briefs</div>
-            </div>
+    <!-- LOADING -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:16px;">Analyzing your codebase...</div>
+        <div class="loading-steps" id="loading_steps">
+            <div class="loading-step" id="step1">⏳ Scanning repository for vulnerabilities</div>
+            <div class="loading-step" id="step2">⏳ Classifying and modeling financial impact</div>
+            <div class="loading-step" id="step3">⏳ Running AI analysis on code context</div>
+            <div class="loading-step" id="step4">⏳ Detecting attack chains</div>
+            <div class="loading-step" id="step5">⏳ Generating executive briefs</div>
+        </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results">
+
+        <!-- Metric bar -->
+        <div class="section-title">
+            Risk Assessment — <span id="result_company">Company</span>
+            <span id="ai_badge_header" class="hidden" style="margin-left:12px;">
+                <span class="ai-badge">✦ AI Analyzed</span>
+            </span>
         </div>
 
-        <!-- RESULTS -->
-        <div id="results">
+        <div class="grid-3" id="metrics" style="margin-bottom:32px;"></div>
 
-            <!-- Metric bar -->
-            <div class="section-title">
-                Risk Assessment — <span id="result_company">Company</span>
-                <span id="ai_badge_header" class="hidden" style="margin-left:12px;">
-                    <span class="ai-badge">✦ AI Analyzed</span>
-                </span>
-            </div>
+        <!-- Executive Summary -->
+        <div class="section-title">Board Summary</div>
+        <div class="summary-pre" id="executive_summary"></div>
 
-            <div class="grid-3" id="metrics" style="margin-bottom:32px;"></div>
-
-            <!-- Executive Summary -->
-            <div class="section-title">Board Summary</div>
-            <div class="summary-pre" id="executive_summary"></div>
-
-            <!-- Attack Chains -->
-            <div id="chains_section" class="hidden">
-                <div class="section-title">⚠️ Attack <span>Chains Detected</span></div>
-                <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
-                    These vulnerabilities can be combined by an attacker into a single multi-step breach path,
-                    causing greater damage than any individual bug.
-                </p>
-                <div id="chains_list"></div>
-            </div>
-
-            <!-- Vulnerability List -->
-            <div class="section-title">Vulnerabilities — <span>Ranked by Financial Priority</span></div>
-            <div id="vuln_list"></div>
-
-            <button class="btn btn-outline" onclick="resetUI()" style="margin-top:20px;">
-                ← Run Another Scan
-            </button>
+        <!-- Attack Chains -->
+        <div id="chains_section" class="hidden">
+            <div class="section-title">⚠️ Attack <span>Chains Detected</span></div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+                These vulnerabilities can be combined by an attacker into a single multi-step breach path,
+                causing greater damage than any individual bug.
+            </p>
+            <div id="chains_list"></div>
         </div>
+
+        <!-- Vulnerability List -->
+        <div class="section-title">Vulnerabilities — <span>Ranked by Financial Priority</span></div>
+        <div id="vuln_list"></div>
+
+        <button class="btn btn-outline" onclick="resetUI()" style="margin-top:20px;">
+            ← Run Another Scan
+        </button>
+    </div>
 
     </div>
 
@@ -958,6 +968,7 @@
                 if (data.company_name) document.getElementById('company_name').value = data.company_name;
                 if (data.industry) document.getElementById('industry').value = data.industry;
                 if (data.company_size) document.getElementById('company_size').value = data.company_size;
+                if (data.system_role) document.getElementById('system_role').value = data.system_role;
                 if (data.annual_revenue) document.getElementById('annual_revenue').value = data.annual_revenue;
                 if (data.monthly_revenue) document.getElementById('monthly_revenue').value = data.monthly_revenue;
 
@@ -1028,24 +1039,27 @@
 
         // --- Collect company context ---
         function getCompany() {
-            const checked = (id) => [...document.querySelectorAll(`#${id} input:checked`)].map(c => c.value);
+            const types = Array.from(document.querySelectorAll('#data_types input:checked')).map(cb => cb.value);
+            const regs = Array.from(document.querySelectorAll('#regulations input:checked')).map(cb => cb.value);
+
             return {
-                company_name: document.getElementById('company_name').value || 'Demo Company',
-                industry: document.getElementById('industry').value,
-                annual_revenue: parseFloat(document.getElementById('annual_revenue').value) || 12000000,
-                monthly_revenue: parseFloat(document.getElementById('monthly_revenue').value) || 1000000,
-                active_users: parseInt(document.getElementById('active_users').value) || 20000,
-                arpu: parseFloat(document.getElementById('arpu').value) || 50,
-                engineer_hourly_cost: parseFloat(document.getElementById('engineer_cost').value) || 80,
+                company_name: document.getElementById('company_name').value || "ACME Corp",
+                industry: document.getElementById('industry').value || "finance",
+                annual_revenue: Number(document.getElementById('annual_revenue').value) || 12000000,
+                monthly_revenue: Number(document.getElementById('monthly_revenue').value) || 1000000,
+                active_users: Number(document.getElementById('active_users').value) || 20000,
+                arpu: Number(document.getElementById('arpu').value) || 50,
+                engineer_hourly_cost: Number(document.getElementById('engineer_cost').value) || 80,
                 deployment_exposure: document.getElementById('exposure').value,
-                infrastructure_type: 'cloud',
-                sensitive_data_types: checked('data_types').length ? checked('data_types') : ['PII'],
-                regulatory_frameworks: checked('regulations').length ? checked('regulations') : ['GDPR'],
-                estimated_records_stored: parseInt(document.getElementById('records').value) || 200000,
-                estimated_downtime_cost_per_hour: parseFloat(document.getElementById('downtime_cost').value) || null,
-                company_size: document.getElementById('company_size').value,
-                product_description: document.getElementById('product_desc').value || null,
+                infrastructure_type: "cloud",
+                system_role: document.getElementById('system_role').value || "saas_product",
+                sensitive_data_types: types,
+                regulatory_frameworks: regs,
+                estimated_records_stored: Number(document.getElementById('records').value) || 200000,
+                company_size: document.getElementById('company_size').value || "mid_size",
+                estimated_downtime_cost_per_hour: Number(document.getElementById('downtime_cost').value) || null,
                 stack_description: document.getElementById('stack_desc').value || null,
+                product_description: document.getElementById('product_desc').value || null
             };
         }
 
@@ -1092,6 +1106,11 @@
             return `$${n.toFixed(0)}`;
         }
 
+        function fmtRange(n) {
+            if (n <= 0) return "$0";
+            return `${fmtMoney(n * 0.8)} - ${fmtMoney(n * 1.2)}`;
+        }
+
         // --- Render results ---
         function renderResults(data) {
             stopLoading();
@@ -1115,7 +1134,7 @@
 
             document.getElementById('metrics').innerHTML = `
       <div class="metric-card">
-        <div class="metric-value">${fmtMoney(total_expected_loss)}</div>
+        <div class="metric-value" style="font-size: 1.5rem;">${fmtRange(total_expected_loss)}</div>
         <div class="metric-label">Total Expected Loss</div>
       </div>
       <div class="metric-card">
@@ -1159,7 +1178,7 @@
           <div style="margin-top:12px;display:flex;gap:16px;align-items:center;">
             <div>
               <div style="font-size:11px;color:var(--muted);text-transform:uppercase;">Combined Expected Loss</div>
-              <div class="chain-loss">${fmtMoney(c.combined_expected_loss)}</div>
+              <div class="chain-loss">${fmtRange(c.combined_expected_loss)}</div>
             </div>
             <div style="font-size:12px;color:var(--muted);">
               Involves: ${c.vulnerability_ids.join(', ')}
@@ -1193,7 +1212,7 @@
               <div class="vuln-file">${r.file}:${r.line} · ${r.exposure}</div>
             </div>
             <div style="text-align:right;">
-              <div class="vuln-loss">${fmtMoney(r.expected_loss)}</div>
+              <div class="vuln-loss" style="font-size: 1rem;">${fmtRange(r.expected_loss)}</div>
               <div style="font-size:11px;color:var(--muted);">expected loss</div>
             </div>
             <div class="vuln-expand" id="expand_${i}">▼</div>
@@ -1210,7 +1229,7 @@
             <div class="brief-pre">${r.business_brief}</div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;">
               <div style="flex:1;min-width:140px;background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
-                <div style="font-size:20px;font-weight:800;font-family:var(--font-mono);color:var(--accent);">${fmtMoney(r.expected_loss)}</div>
+                <div style="font-size:16px;font-weight:800;font-family:var(--font-mono);color:var(--accent);">${fmtRange(r.expected_loss)}</div>
                 <div style="font-size:11px;color:var(--muted);">Expected Loss</div>
               </div>
               <div style="flex:1;min-width:140px;background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">

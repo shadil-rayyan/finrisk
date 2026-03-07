@@ -29,6 +29,7 @@ def analyze_vulnerability(
 COMPANY CONTEXT:
 - Company: {company.company_name}
 - Industry: {company.industry}
+- System Role: {company.system_role} (e.g. saas_product, infrastructure, framework)
 - Product: {company.product_description or 'Not specified'}
 - Tech stack: {company.stack_description or 'Not specified'}
 - Data stored: {', '.join(company.sensitive_data_types)}
@@ -36,7 +37,7 @@ COMPANY CONTEXT:
 
 VULNERABILITY DETECTED:
 - Type: {bug_type}
-- File: {file}, Line: {line}
+- File: {file}, Line(s): {line}
 - Scanner message: {message}
 - Baseline exploit probability: {baseline_probability}
 
@@ -49,20 +50,24 @@ Analyze this vulnerability and respond ONLY with valid JSON in exactly this form
 {{
   "is_exploitable": true or false,
   "exploitability_confidence": "high" or "medium" or "low",
-  "exploitability_reasoning": "2-3 sentences explaining WHY this is or isn't exploitable based on the actual code",
-  "business_context": "1-2 sentences describing what this code actually does and what business function it serves",
-  "adjusted_probability": 0.0 to 1.0 (adjust the baseline based on what you see in the code),
+  "exploitability_reasoning": "2-3 sentences explaining WHY this is or isn't exploitable based on the actual code, historical breach rates for this bug, and system context.",
+  "business_context": "1-2 sentences describing what this code actually does and what business function it serves.",
+  "authentication_required": "public_unauthenticated", "authenticated_user", "admin_only", or "internal_service",
+  "data_scope": "full_database", "single_user_record", "system_files", or "none",
+  "adjusted_probability": 0.0 to 1.0 (adjust the baseline based on auth required, exposure, and realistic attack conditions),
   "false_positive_likelihood": "high" or "medium" or "low",
   "recommended_fix": "Specific fix — include actual code if possible, or precise instructions",
   "fix_complexity": "simple" or "moderate" or "complex"
 }}
 
 Rules:
-- If code context is unavailable, reason from file name, bug type, and company context
-- Be specific — reference actual variable names or patterns you see in the code
-- If this looks like a test file or dead code, say so and lower the probability
-- If the input appears to come directly from user requests, raise the probability
-- The recommended_fix must be actionable — not generic advice"""
+- If this is a framework/library issue and this company builds a framework, the impact is to the end-users.
+- If this looks like a test file or dead code, set `is_exploitable` to false and lower the probability.
+- Evaluate if authentication is really required based on routing, namespaces (e.g., admin_controller), or middleware.
+- Base `data_scope` on the type of query or access (e.g. read-only vs full drop table, limited ORM scope vs raw SQL).
+- If the input appears to come directly from user requests, raise the probability.
+- The recommended_fix must be actionable — not generic advice.
+- Adjust `adjusted_probability` down heavily for admin-only bugs or non-production code. Give logical justification in reasoning."""
 
     try:
         response = model.generate_content(prompt)
@@ -78,6 +83,8 @@ Rules:
             exploitability_confidence=data.get("exploitability_confidence", "medium"),
             exploitability_reasoning=data.get("exploitability_reasoning", ""),
             business_context=data.get("business_context", ""),
+            authentication_required=data.get("authentication_required", "unknown"),
+            data_scope=data.get("data_scope", "unknown"),
             adjusted_probability=float(data.get("adjusted_probability", baseline_probability)),
             false_positive_likelihood=data.get("false_positive_likelihood", "medium"),
             recommended_fix=data.get("recommended_fix", "Review and remediate manually."),

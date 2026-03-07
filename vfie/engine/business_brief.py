@@ -13,6 +13,12 @@ def fmt(amount: float) -> str:
         return f"${amount/1_000_000:.1f}M"
     return f"${amount:,.0f}"
 
+def fmt_range(amount: float) -> str:
+    if amount <= 0: return "$0"
+    low = amount * 0.8
+    high = amount * 1.2
+    return f"{fmt(low)} – {fmt(high)}"
+
 
 def humanize_data_types(data_types: list) -> str:
     mapping = {
@@ -79,19 +85,20 @@ AI ANALYSIS: POTENTIAL FALSE POSITIVE
 AI ANALYSIS OF THIS SPECIFIC CODE
   What this code does: {g.business_context}
   Why it's exploitable: {g.exploitability_reasoning}
-  Confidence level: {g.exploitability_confidence}
+  Authentication required: {g.authentication_required.upper()}
+  Data Scope: {g.data_scope.upper()}
 """
 
     # Cost lines
     cost_lines = ""
     if b.data_breach_cost > 0:
-        cost_lines += f"  {'Customer data breach cost:':<42} {fmt(b.data_breach_cost)}\n"
+        cost_lines += f"  {'Data breach cost:':<42} {fmt_range(b.data_breach_cost)}\n"
     if b.regulatory_penalty > 0:
-        cost_lines += f"  {f'Regulatory fines ({frameworks}):':<42} {fmt(b.regulatory_penalty)}\n"
+        cost_lines += f"  {f'Regulatory fines ({frameworks}):':<42} {fmt_range(b.regulatory_penalty)}\n"
     if b.reputation_damage > 0:
-        cost_lines += f"  {'Lost customers (estimated churn):':<42} {fmt(b.reputation_damage)}\n"
-    cost_lines += f"  {'Incident response + legal:':<42} {fmt(b.incident_response_cost)}\n"
-    cost_lines += f"  {'System downtime cost:':<42} {fmt(b.downtime_cost)}\n"
+        cost_lines += f"  {'Lost customers (estimated churn):':<42} {fmt_range(b.reputation_damage)}\n"
+    cost_lines += f"  {'Incident response + legal:':<42} {fmt_range(b.incident_response_cost)}\n"
+    cost_lines += f"  {'System downtime cost:':<42} {fmt_range(b.downtime_cost)}\n"
 
     # Fix guidance from Gemini
     fix_guidance = ""
@@ -121,12 +128,12 @@ HOW A REAL BREACH HAPPENS — STEP BY STEP
 
 WHAT THIS COSTS {company.company_name.upper()} IF NOT FIXED
 {cost_lines}  {'─'*55}
-  {'TOTAL POTENTIAL LOSS:':<42} {fmt(result.total_impact)}
+  {'TOTAL POTENTIAL LOSS:':<42} {fmt_range(result.total_impact)}
 
   Probability of exploitation: {prob_pct}%
-  {'(AI-adjusted from baseline based on code analysis)' if result.gemini_analysis else '(Based on industry data for this exposure level)'}
+  {'(AI-adjusted from baseline based on code analysis and system role)' if result.gemini_analysis else '(Based on industry data for this exposure level)'}
 
-  EXPECTED LOSS (probability × impact): {fmt(result.expected_loss)}
+  EXPECTED LOSS (probability × impact): {fmt_range(result.expected_loss)}
   This is the actuarial cost of carrying this risk unresolved.
 
 WHAT THE FIX COSTS
@@ -146,11 +153,24 @@ DECISION REQUIRED
 
 def generate_executive_summary(results: list, company: CompanyContext,
                                  chains: list = None) -> str:
-    total_loss     = sum(r.expected_loss for r in results)
     total_impact   = sum(r.total_impact for r in results)
     total_hours    = sum(r.fix_effort_hours for r in results)
     total_fix_cost = total_hours * company.engineer_hourly_cost
-    roi            = int(total_loss / total_fix_cost) if total_fix_cost > 0 else 0
+
+    # 11. Deduplicate/Aggregate losses accurately using attack chains
+    chained_vuln_ids = set()
+    chain_loss_total = 0
+    if chains:
+        for c in chains:
+            chain_loss_total += c.combined_expected_loss
+            for vid in c.vulnerability_ids:
+                chained_vuln_ids.add(vid)
+                
+    unchained_loss = sum(r.expected_loss for r in results if r.vulnerability_id not in chained_vuln_ids)
+    total_loss = chain_loss_total + unchained_loss
+
+    # If ROI is absurd, cap it at max. Or calculate based on range avg.
+    roi = int(total_loss / total_fix_cost) if total_fix_cost > 0 else 0
 
     critical = [r for r in results if r.expected_loss >= 100000]
     high     = [r for r in results if 30000 <= r.expected_loss < 100000]
@@ -160,16 +180,16 @@ def generate_executive_summary(results: list, company: CompanyContext,
     for i, r in enumerate(results[:3]):
         label = r.bug_type.replace("_", " ").title()
         gemini_note = " ✓ AI-verified" if (r.gemini_analysis and r.gemini_analysis.is_exploitable) else ""
-        top3 += f"  #{i+1}  {label:<32} Expected loss: {fmt(r.expected_loss):<12}  Fix: {r.fix_effort_hours}h{gemini_note}\n"
+        top3 += f"  #{i+1}  {label:<32} Expected loss: {fmt_range(r.expected_loss):<18} Fix: {r.fix_effort_hours}h{gemini_note}\n"
 
     chain_block = ""
     if chains:
         chain_block = f"\nATTACK CHAINS DETECTED: {len(chains)}\n"
         for c in chains:
             chain_block += f"  {c.chain_id}: {c.chain_description}\n"
-            chain_block += f"  Combined exposure: {fmt(c.combined_expected_loss)} | Severity: {c.combined_severity.upper()}\n\n"
+            chain_block += f"  Combined exposure: {fmt_range(c.combined_expected_loss)} | Severity: {c.combined_severity.upper()}\n\n"
 
-    gemini_note = "\n  Note: Probabilities have been adjusted by AI analysis of actual code context." \
+    gemini_note = "\n  Note: Probabilities and Impacts have been adjusted by AI analysis of actual code context and data scopes." \
                   if any(r.gemini_analysis for r in results) else ""
 
     return f"""{'='*65}
@@ -178,11 +198,11 @@ def generate_executive_summary(results: list, company: CompanyContext,
 {'='*65}
 
 BOTTOM LINE
-  We have {len(results)} known security vulnerabilities.
-  Total exposure if all exploited:              {fmt(total_impact)}
-  Expected loss (probability-adjusted):        {fmt(total_loss)}
-  Total cost to fix everything:                {fmt(total_fix_cost)} ({total_hours:.0f} hours)
-  Fixing costs {roi}× less than the expected loss of not fixing.
+  We have {len(results)} distinct grouped security vulnerabilities.
+  Total exposure if all exploited:              {fmt_range(total_impact)}
+  Expected loss (probability-adjusted):         {fmt_range(total_loss)}
+  Total cost to fix everything:                 {fmt(total_fix_cost)} ({total_hours:.0f} hours)
+  Fixing yields up to {fmt(roi)}× ROI compared to expected loss.
 {gemini_note}
 
 RISK BREAKDOWN
@@ -193,7 +213,7 @@ RISK BREAKDOWN
 TOP 3 RISKS BY FINANCIAL EXPOSURE
 {top3}{chain_block}
 WHAT HAPPENS IF WE DO NOTHING
-  Based on breach rates for {company.industry} companies our size, at least one
+  Based on breach rates for {company.industry} {company.system_role.replace('_', ' ')}s our size, at least one
   of these vulnerabilities is likely to be found and exploited within
   6–18 months if unaddressed.
 

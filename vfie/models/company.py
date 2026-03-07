@@ -21,6 +21,7 @@ class CompanyContext(BaseModel):
     estimated_records_stored: int
     estimated_downtime_cost_per_hour: Optional[float] = None
     company_size: str = "mid_size"
+    system_role: str = "saas_product"    # "saas_product", "infrastructure", "framework", "internal_tool", "microservice"
     stack_description: Optional[str] = None
     product_description: Optional[str] = None
 

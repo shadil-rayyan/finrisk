@@ -1,8 +1,9 @@
 import json
 from models.company import CompanyContext
-from models.risk_result import ImpactBreakdown
+from models.risk_result import ImpactBreakdown, GeminiAnalysis
+from typing import Optional
 
-def compute_total_impact(company: CompanyContext, bug_type: str):
+def compute_total_impact(company: CompanyContext, bug_type: str, gemini_result: Optional[GeminiAnalysis] = None):
     with open("knowledge_base/breach_costs.json")     as f: bc  = json.load(f)
     with open("knowledge_base/regulatory_models.json") as f: rm  = json.load(f)
     with open("knowledge_base/downtime_estimates.json") as f: de  = json.load(f)
@@ -14,7 +15,24 @@ def compute_total_impact(company: CompanyContext, bug_type: str):
     if bug_info.get("data_exfiltration", False):
         cpr = bc["cost_per_record_by_industry"].get(
             company.industry.lower(), bc["cost_per_record_by_industry"]["default"])
-        data_breach = int(company.estimated_records_stored * 0.20) * cpr
+        
+        # 3, 5, 8, 10: Adjust dataset size based on data_scope and system_role
+        scope_multiplier = 0.20 # baseline
+        if gemini_result:
+            if gemini_result.data_scope == "full_database":
+                scope_multiplier = 1.0
+            elif gemini_result.data_scope == "single_user_record":
+                scope_multiplier = 0.0001
+            elif gemini_result.data_scope == "none":
+                scope_multiplier = 0.0
+                
+        # If it's a framework, the users impacted could be 0 for the company, but HUGE for the ecosystem. 
+        # But this engine models risk for the *Company*, so framework vendor has 0 data records but huge reputation.
+        if company.system_role in ["framework", "infrastructure"] and not gemini_result:
+            scope_multiplier = 0.05
+
+        records = int(company.estimated_records_stored * scope_multiplier)
+        data_breach = records * cpr
     else:
         data_breach = 0.0
 

@@ -90,7 +90,7 @@ def run_risk_engine(
                    not gemini_result.is_exploitable:
                     effective_p = 0.01  # near-zero but keep in report
 
-        breakdown, total_impact = compute_total_impact(company, bug_type)
+        breakdown, total_impact = compute_total_impact(company, bug_type, gemini_result)
         expected_loss  = compute_expected_loss(effective_p, total_impact)
         priority_score = compute_priority_score(expected_loss, fix_effort)
         fix_cost       = compute_fix_cost(fix_effort, company.engineer_hourly_cost)

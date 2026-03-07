@@ -13,6 +13,8 @@ class GeminiAnalysis(BaseModel):
     exploitability_confidence: str       # "high", "medium", "low"
     exploitability_reasoning: str        # plain English explanation
     business_context: str                # what this endpoint/code actually does
+    authentication_required: str = "unknown" # e.g. "public_unauthenticated", "admin_only"
+    data_scope: str = "unknown"          # e.g. "full_database", "system_files"
     adjusted_probability: float          # Gemini-adjusted probability (vs table default)
     false_positive_likelihood: str       # "high", "medium", "low"
     recommended_fix: str                 # actual fix code or instructions
