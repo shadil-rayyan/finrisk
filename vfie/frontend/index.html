@@ -666,6 +666,20 @@
                 <!-- Left: Company Context -->
                 <div>
                     <div class="card">
+                        <div class="card-title">Quick JSON Import</div>
+                        <label>Paste Company JSON</label>
+                        <textarea id="company_json_paste" placeholder='{ "company_name": "PostHog", ... }'
+                            style="min-height: 100px;"></textarea>
+                        <button class="btn btn-outline" onclick="importCompanyJSON()"
+                            style="width: 100%; margin-top: 8px;">
+                            ✨ Auto-populate Form
+                        </button>
+                        <div id="import_success"
+                            style="font-size: 11px; color: var(--green); margin-top: 8px; display: none;">✓ JSON
+                            imported successfully!</div>
+                    </div>
+
+                    <div class="card">
                         <div class="card-title">Company Context</div>
 
                         <label>Company Name</label>
@@ -933,6 +947,61 @@
     </div>
 
     <script>
+        // --- JSON Import ---
+        function importCompanyJSON() {
+            const area = document.getElementById('company_json_paste');
+            const success = document.getElementById('import_success');
+            try {
+                const data = JSON.parse(area.value);
+
+                // Map fields
+                if (data.company_name) document.getElementById('company_name').value = data.company_name;
+                if (data.industry) document.getElementById('industry').value = data.industry;
+                if (data.company_size) document.getElementById('company_size').value = data.company_size;
+                if (data.annual_revenue) document.getElementById('annual_revenue').value = data.annual_revenue;
+                if (data.monthly_revenue) document.getElementById('monthly_revenue').value = data.monthly_revenue;
+
+                // User count variations
+                const users = data.active_users || data.active_customers || data.active_stores || data.developers_using_platform || 0;
+                document.getElementById('active_users').value = users;
+
+                if (data.arpu) document.getElementById('arpu').value = data.arpu;
+                if (data.engineer_hourly_cost) document.getElementById('engineer_cost').value = data.engineer_hourly_cost;
+                if (data.estimated_records_stored) document.getElementById('records').value = data.estimated_records_stored;
+                if (data.deployment_exposure) {
+                    const exp = data.deployment_exposure.toLowerCase();
+                    if (exp.includes('public')) document.getElementById('exposure').value = 'public';
+                    else if (exp.includes('internal')) document.getElementById('exposure').value = 'internal';
+                    else if (exp.includes('private')) document.getElementById('exposure').value = 'private';
+                }
+                if (data.estimated_downtime_cost_per_hour) document.getElementById('downtime_cost').value = data.estimated_downtime_cost_per_hour;
+
+                // Checkboxes
+                if (data.sensitive_data_types) {
+                    const dts = data.sensitive_data_types.map(t => t.toUpperCase());
+                    document.querySelectorAll('#data_types input').forEach(cb => {
+                        cb.checked = dts.includes(cb.value.toUpperCase()) || dts.some(t => cb.value.toUpperCase().includes(t));
+                        cb.closest('.checkbox-item').classList.toggle('checked', cb.checked);
+                    });
+                }
+                if (data.regulatory_frameworks) {
+                    const regs = data.regulatory_frameworks.map(r => r.toUpperCase());
+                    document.querySelectorAll('#regulations input').forEach(cb => {
+                        cb.checked = regs.includes(cb.value.toUpperCase());
+                        cb.closest('.checkbox-item').classList.toggle('checked', cb.checked);
+                    });
+                }
+
+                if (data.product_description) document.getElementById('product_desc').value = data.product_description;
+                if (data.stack_description) document.getElementById('stack_desc').value = data.stack_description;
+
+                success.style.display = 'block';
+                setTimeout(() => { success.style.display = 'none'; }, 3000);
+            } catch (e) {
+                alert("Invalid JSON format. Please check your input.");
+            }
+        }
+
         // --- Tab switching ---
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach((t, i) => {
