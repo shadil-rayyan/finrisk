@@ -1,4 +1,6 @@
 import json, os, shutil
+from dotenv import load_dotenv
+load_dotenv()
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
