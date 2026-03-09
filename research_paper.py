@@ -9,6 +9,10 @@ from typing import Dict, Any, List
 # Add current dir to sys.path for internal imports
 sys.path.append(os.getcwd())
 
+# Ensure venv/bin is in PATH for subprocess calls (like semgrep)
+venv_bin = os.path.join(os.getcwd(), "venv", "bin")
+os.environ["PATH"] = venv_bin + os.pathsep + os.environ.get("PATH", "")
+
 from models.company import CompanyContext
 from engine.scanner import clone_repo, run_semgrep, parse_semgrep_findings
 from main import run_risk_engine, generate_executive_summary
@@ -74,26 +78,31 @@ def run_experiment(exp: Dict[str, Any], output_dir: str):
         parsed_findings = parse_semgrep_findings(raw_findings, company.deployment_exposure, repo_path)
         
         # 4. AI-Enhanced Risk Engine
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = os.getenv("GEMINI_API_KEY") or os.getenv("gemini_api_key")
         if not api_key:
             print("Warning: GEMINI_API_KEY not found. AI features will be disabled.")
         
         print("Running Risk Analysis (AI Assistance Active)...")
-        results, chains = run_risk_engine(parsed_findings, company, api_key)
+        results, chains, gemini_filtered_count = run_risk_engine(parsed_findings, company, api_key)
         
         # AI Reduction Count: 
         # In our engine, if AI determines it's a false positive or low risk, 
-        # it sets effective_probability to 0.01.
-        # We define 'Filtered' findings as those that are truly exploitable according to AI.
+        # it sets effective_probability to 0.01 OR filters it entirely.
         filtered_results = [r for r in results if r.effective_probability > 0.01]
         filtered_count = len(filtered_results)
+        
+        # Total reduction = whatever is filtered completely + whatever was knocked down to near 0
         reduction_count = raw_count - filtered_count
         reduction_pct = (reduction_count / raw_count * 100) if raw_count > 0 else 0
         
         # 5. Save Report
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{company.company_name.replace(' ', '_').lower()}_{timestamp}.md"
-        output_path = os.path.join(output_dir, filename)
+        company_slug = company.company_name.replace(' ', '_').lower()
+        company_dir = os.path.join(output_dir, company_slug)
+        os.makedirs(company_dir, exist_ok=True)
+        
+        filename = f"report_{timestamp}.md"
+        output_path = os.path.join(company_dir, filename)
         
         # Rankings (results are already sorted by priority_score)
         summary = generate_executive_summary(results, company, chains)
@@ -138,7 +147,7 @@ if __name__ == "__main__":
     from dotenv import load_dotenv
     load_dotenv()
     
-    INPUT_FILE = "/home/shadil/code/personal/test/finrisk/Doc/archive/experiment_log/repo_json.md"
+    INPUT_FILE = "/home/shadil/code/personal/test/finrisk/Doc/experiment_log/repo_json.md"
     OUTPUT_DIR = "/home/shadil/code/personal/test/finrisk/Doc/experiment_log"
     
     os.makedirs(OUTPUT_DIR, exist_ok=True)

@@ -25,10 +25,11 @@ A lookup table (`exploit_probability.json`) assigns a baseline `P` based on the 
 
 *Example: SQL Injection on a **PUBLIC** endpoint has a higher baseline `P` than on an **INTERNAL** endpoint.*
 
-### B. Gemini-Adjusted Probability (Optional)
-When Gemini AI is enabled, it analyzes the actual code context and adjusts the probability:
-- **Increase**: If the input is directly user-controllable without validation.
-- **Decrease**: If the code is non-exploitable (e.g., in a test file) or requires high privileges (e.g., Admin Only).
+### B. Context & Asset Adjustments (Phase 1)
+Instead of a simple "one-size-fits-all" model, probabilities and impact are heavily adjusted by mapping the vulnerability to its specific **Asset** (`AssetContext`):
+- **Asset Linkage**: The model automatically detects if a vulnerability resides in a specific asset (e.g. `Payment API` vs `Logging DB`).
+- **Environment Override**: A vulnerability's baseline exposure is overwritten by the Asset’s environment setting (e.g., overriding a public `P` to an internal `P` if the asset is strictly internal).
+- **Gemini Context**: When Gemini AI analyzes the code, it uses the mapped asset's business value, environment, and handled data to deduce a much more accurate `P` score.
 
 ---
 
@@ -42,6 +43,7 @@ $$Total\ Impact = Data\ Breach + Incident\ Response + Downtime + Regulatory + Re
 Calculated as: `(Estimated Records × Exposure Factor) × Cost Per Record`.
 - **Cost Per Record**: Industry-adjusted (e.g., Healthcare costs more than Retail).
 - **Exposure Factor**: Fixed at 20% by default (assuming a significant but not total breach).
+- **Asset-Linked Data Types**: If the vulnerability maps to a specific asset, we only measure risk against the *specific data types* handled by that asset (avoiding noise).
 
 ### B. Incident Response (IR)
 Fixed costs based on **Company Size**:
@@ -52,7 +54,7 @@ Fixed costs based on **Company Size**:
 ### C. Operational Downtime
 Calculated as: `Downtime Hours × Cost Per Hour`.
 - **Downtime Hours**: Determined by the specific bug type (e.g., RCE causes more downtime than XSS).
-- **Cost Per Hour**: Based on `Company Revenue` and `Industry Benchmarks`.
+- **Cost Per Hour**: Based on the `Asset's Value` ($/hour) if available, falling back to `Company Revenue` benchmarks.
 
 ### D. Regulatory Penalties
 The engine checks applicable frameworks (e.g., GDPR, PCI-DSS, HIPAA, CCPA) based on industry and sensitive data types:
@@ -64,6 +66,15 @@ The engine checks applicable frameworks (e.g., GDPR, PCI-DSS, HIPAA, CCPA) based
 Models the loss of customers after a public breach:
 - **Formula**: `(Active Users × Churn Rate) × ARPU × 12 months`.
 - **Churn Rate**: Varies by data sensitivity (High sensitivity = 10% churn).
+
+---
+
+## 📉 3. Environment & Exposure Scaling
+
+Not all environments face the same risk. Findings are automatically scaled before calculating Priority Scores:
+- **Production (`prod`)**: 100% of Expected Loss.
+- **Staging (`staging`)**: Scaled down drastically (10%), as it may occasionally contain sanitized production data.
+- **Development/Test (`dev`/`test`)**: Scaled effectively to zero (1%) mitigating noise about regulatory fines or customer churn against mock data.
 
 ---
 

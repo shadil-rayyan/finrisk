@@ -3,7 +3,7 @@ import json
 import google.generativeai as genai
 from typing import Optional
 from models.risk_result import GeminiAnalysis
-from models.company import CompanyContext
+from models.company import CompanyContext, AssetContext
 
 def init_gemini(api_key: str):
     genai.configure(api_key=api_key)
@@ -16,13 +16,14 @@ def analyze_vulnerability(
     message: str,
     exposure: str,
     company: CompanyContext,
-    baseline_probability: float
+    baseline_probability: float,
+    asset: Optional[AssetContext] = None
 ) -> Optional[GeminiAnalysis]:
     """
     Ask Gemini to analyze a single vulnerability with full code context.
     Returns structured analysis including adjusted probability and fix.
     """
-    model = genai.GenerativeModel("gemini-1.5-flash")  # free tier
+    model = genai.GenerativeModel("gemini-2.5-flash")  # free tier
 
     prompt = f"""You are a senior application security engineer performing a vulnerability assessment.
 
@@ -32,8 +33,19 @@ COMPANY CONTEXT:
 - System Role: {company.system_role} (e.g. saas_product, infrastructure, framework)
 - Product: {company.product_description or 'Not specified'}
 - Tech stack: {company.stack_description or 'Not specified'}
-- Data stored: {', '.join(company.sensitive_data_types)}
-- Deployment: {exposure} facing
+- Global Data stored: {', '.join(company.sensitive_data_types)}
+- Base Deployment: {exposure} facing
+
+ASSET CONTEXT (The specific component this vulnerability affects):
+{
+f"- Asset Name: {asset.name}" + chr(10) +
+f"- Business Function: {asset.business_function}" + chr(10) +
+f"- Estimated Value: ${asset.estimated_value_usd:,.2f}" + chr(10) +
+f"- Handled Data: {', '.join(asset.sensitive_data_types)}" + chr(10) +
+f"- Asset Environment: {asset.environment}" + chr(10) +
+f"- Asset Exposure: {asset.exposure}"
+if asset else "- This vulnerability affects the general codebase."
+}
 
 VULNERABILITY DETECTED:
 - Type: {bug_type}
